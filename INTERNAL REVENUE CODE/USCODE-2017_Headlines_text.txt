@@ -1,0 +1,312 @@
+### Internal Revenue Title Structure
+
+#### Subtitle A—Income Taxes
+Chapter 1: Normal Taxes and Surtaxes
+  Subchapter A: Determination of Tax Liability
+    Part I: Tax on Individuals
+    Part II: Tax on Corporations
+    Part III: Changes in Rates During a Taxable Year
+  Subchapter B: Computation of Taxable Income
+    Part I: Deductions
+    Part II: Exemptions
+  Subchapter C: Corporate Distributions and Adjustments
+    Part I: Distributions to Shareholders
+    Part II: Corporate Liquidations
+  Subchapter D: Deferred Compensation, etc.
+    Part I: Qualified Pension, Profit-Sharing, and Stock Bonus Plans
+    Part II: Certain Stock Options
+  Subchapter E: Accounting Periods and Methods of Accounting
+  Subchapter F: Exempt Organizations
+  Subchapter G: Corporations Used to Avoid Income Tax on Shareholders
+  Subchapter H: Banking Institutions
+  Subchapter I: Natural Resources
+  Subchapter J: Estates, Trusts, Beneficiaries, and Decedents
+  Subchapter K: Partners and Partnerships
+  Subchapter L: Insurance Companies
+  Subchapter M: Regulated Investment Companies and Real Estate Investment Trusts
+  Subchapter N: Tax Based on Income From Sources Within or Without the United States
+  Subchapter O: Gain or Loss on Disposition of Property
+  Subchapter P: Capital Gains and Losses
+  Subchapter Q: Readjustment of Tax Between Years and Special Limitations
+  Subchapter R: Election to Determine Corporate Tax on Certain International Shipping Activities Using Per Ton Rate
+  Subchapter S: Tax Treatment of S Corporations and Their Shareholders
+  Subchapter T: Cooperatives and Their Patrons
+  Subchapter U: Designation and Treatment of Empowerment Zones, Enterprise Communities, and Rural Development Investment Areas
+  Subchapter V: Title 11 Cases
+  Subchapter Z: Opportunity Zones
+
+Chapter 2: Tax on Self-Employment Income
+  Sec. 1401: Tax imposed.
+
+Chapter 2A: Unearned Income Medicare Contribution
+  Sec. 1411: Additional tax imposed.
+
+Chapter 3: Withholding of Tax on Nonresident Aliens and Foreign Corporations
+  Sec. 1441: Withholding obligation.
+  Sec. 1442: Tax imposed on foreign corporations.
+
+Chapter 4: Taxes to Enforce Reporting on Certain Foreign Accounts
+  Sec. 1471: Withholding obligations.
+  Sec. 1474: Special rules.
+
+Chapter 6: Consolidated Returns
+  Sec. 1501: Privilege to file consolidated returns.
+  Sec. 1504: Definitions and special rules.
+
+---
+
+#### Subtitle B—Estate and Gift Taxes
+Chapter 11: Estate Tax
+  Subchapter A: General Provisions
+  Subchapter B: Credits Against Tax
+  Subchapter C: Additional Taxes
+
+Chapter 12: Gift Tax
+  Subchapter A: Imposition of Tax
+  Subchapter B: Exclusions and Deductions
+
+Chapter 13: Tax on Generation-Skipping Transfers
+  Subchapter A: Tax Imposed
+  Subchapter B: Exceptions and Special Rules
+
+Chapter 14: Special Valuation Rules
+  Sec. 2701: Valuation principles.
+
+Chapter 15: Gifts and Bequests from Expatriates
+  Sec. 2801: Imposition of tax.
+
+---
+
+#### Subtitle C—Employment Taxes
+Chapter 21: Federal Insurance Contributions Act
+  Sec. 3101: Tax on employees.
+  Sec. 3111: Tax on employers.
+
+Chapter 22: Railroad Retirement Tax Act
+  Sec. 3201: Tax imposed.
+  Sec. 3221: Rates of tax.
+
+Chapter 23: Federal Unemployment Tax Act
+  Sec. 3301: Tax imposed.
+  Sec. 3306: Definitions.
+
+Chapter 23A: Railroad Unemployment Repayment Tax
+  Sec. 3321: Tax imposed.
+
+Chapter 24: Collection of Income Tax at Source on Wages
+  Sec. 3401: Definitions.
+
+Chapter 25: General Provisions Relating to Employment Taxes
+  Sec. 3501: Collection and payment of taxes.
+
+---
+
+#### Subtitle D—Miscellaneous Excise Taxes
+Chapter 31: Retail Excise Taxes
+  Sec. 4001: Tax on certain vehicles.
+  Sec. 4011: Environmental taxes.
+
+Chapter 32: Manufacturers Excise Taxes
+  Sec. 4061: Tax on motor vehicles.
+  Sec. 4081: Tax on gasoline.
+
+Chapter 33: Facilities and Services
+  Sec. 4231: Tax on use of certain facilities.
+
+Chapter 34: Taxes on Certain Insurance Policies
+  Sec. 4371: Imposition of tax.
+
+Chapter 35: Taxes on Wagering
+  Sec. 4401: Tax imposed.
+
+Chapter 36: Certain Other Excise Taxes
+  Sec. 4461: Taxes on harbor maintenance.
+
+Chapter 38: Environmental Taxes
+  Sec. 4611: Tax on petroleum.
+
+Chapter 39: Registration-Required Obligations
+  Sec. 4701: Tax imposed.
+
+Chapter 40: General Provisions Relating to Occupational Taxes
+  Sec. 4901: Records required.
+
+Chapter 41: Public Charities
+  Sec. 4911: Expenditures.
+
+Chapter 42: Private Foundations and Certain Other Tax-Exempt Organizations
+  Sec. 4940: Tax imposed.
+
+Chapter 43: Qualified Pension Plans
+  Sec. 4971: Imposition of tax.
+
+Chapter 44: Qualified Investment Entities
+  Sec. 4981: Distribution requirements.
+
+Chapter 45: Provisions Relating to Expatriated Entities
+  Sec. 4985: Stock transfer tax.
+
+Chapter 46: Golden Parachute Payments
+  Sec. 4999: Imposition of tax.
+
+Chapter 47: Certain Group Health Plans
+  Sec. 5000: Definitions.
+
+Chapter 48: Maintenance of Minimum Essential Coverage
+  Sec. 5000A: Tax imposed.
+
+Chapter 49: Cosmetic Services
+  Sec. 5000B: Imposition of tax.
+
+Chapter 50: Foreign Procurement
+  Sec. 5000C: Tax imposed.
+
+---
+
+#### Subtitle E—Alcohol, Tobacco, and Certain Other Excise Taxes
+Chapter 51: Distilled Spirits, Wines, and Beer
+  Sec. 5001: Tax on distilled spirits.
+
+Chapter 52: Tobacco Products and Cigarette Papers and Tubes
+  Sec. 5701: Tax imposed.
+
+Chapter 53: Machine Guns, Destructive Devices, and Certain Other Firearms
+  Sec. 5801: Tax imposed.
+
+Chapter 54: Greenmail
+  Sec. 5881: Tax imposed.
+
+Chapter 55: Structured Settlement Factoring Transactions
+  Sec. 5891: Tax imposed.
+
+---
+
+#### Subtitle F—Procedure and Administration
+
+Chapter 61: Information and Returns
+  Sec. 6001: Requirement to keep records.
+  Sec. 6011: General requirement of return, statement, or list.
+  Sec. 6012: Persons required to make returns of income.
+  Sec. 6013: Joint returns of income tax by husband and wife.
+  Sec. 6015: Relief from joint and several liability on joint return.
+  Sec. 6031: Returns of partnerships.
+  Sec. 6033: Returns by exempt organizations.
+  Sec. 6038: Information reporting with respect to foreign corporations and partnerships.
+
+Chapter 62: Time and Place for Paying Tax
+  Sec. 6151: Time and place for paying tax shown on returns.
+  Sec. 6155: Payment by check or money order.
+  Sec. 6161: Extension of time for paying tax or deficiency.
+
+Chapter 63: Assessment
+  Sec. 6201: Assessment authority.
+  Sec. 6203: Method of assessment.
+  Sec. 6211: Definition of a deficiency.
+  Sec. 6212: Notice of deficiency.
+  Sec. 6213: Restrictions applicable to deficiencies; petition to Tax Court.
+
+Chapter 64: Collection
+  Sec. 6301: Authority to collect taxes.
+  Sec. 6303: Notice and demand for tax.
+  Sec. 6321: Lien for taxes.
+  Sec. 6331: Levy and distraint.
+
+Chapter 65: Abatements, Credits, and Refunds
+  Sec. 6401: Amounts treated as overpayments.
+  Sec. 6402: Authority to make credits or refunds.
+
+Chapter 66: Limitations
+  Sec. 6501: Limitations on assessment and collection.
+  Sec. 6502: Collection after assessment.
+
+Chapter 67: Interest
+  Sec. 6601: Interest on underpayment, nonpayment, or extensions of time for payment of tax.
+
+Chapter 68: Additions to the Tax, Additional Amounts, and Assessable Penalties
+  Sec. 6651: Failure to file tax return or to pay tax.
+  Sec. 6652: Failure to file certain information returns, registration statements, etc.
+  Sec. 6654: Failure by individual to pay estimated income tax.
+
+Chapter 69: General Provisions Relating to Stamps
+  Sec. 6801: Authority to prescribe stamps.
+
+Chapter 70: Jeopardy, Receiverships, etc.
+  Sec. 6851: Termination assessments of income tax.
+  Sec. 6861: Jeopardy assessments of income, estate, gift, and certain excise taxes.
+
+Chapter 71: Transferees and Fiduciaries
+  Sec. 6901: Procedure for collection of taxes.
+
+Chapter 72: Licensing and Registration
+  Sec. 7001: Cross references.
+
+Chapter 74: Closing Agreements and Compromises
+  Sec. 7121: Closing agreements.
+  Sec. 7122: Compromises.
+
+Chapter 75: Crimes, Other Offenses, and Forfeitures
+  Sec. 7201: Attempt to evade or defeat tax.
+  Sec. 7202: Willful failure to collect or pay over tax.
+
+Chapter 76: Judicial Proceedings
+  Sec. 7401: Authorization.
+  Sec. 7402: Jurisdiction of district courts.
+
+Chapter 77: Miscellaneous Provisions
+  Sec. 7501: Trust fund recovery.
+
+Chapter 78: Discovery of Liability and Enforcement of Title
+  Sec. 7601: Canvass of districts for taxable persons and objects.
+
+Chapter 79: Definitions
+  Sec. 7701: Definitions.
+
+Chapter 80: General Rules
+  Sec. 7801: Authority of the Department of the Treasury.
+  Sec. 7803: Commissioner of Internal Revenue; other officials.
+
+
+---
+
+#### Subtitle G—The Joint Committee on Taxation
+Chapter 91: Organization and Membership of the Joint Committee
+  Sec. 8001: Establishment of Joint Committee.
+  Sec. 8002: Membership and structure.
+
+Chapter 92: Powers and Duties of the Joint Committee
+  Sec. 8021: Authorization and duties.
+  Sec. 8022: Investigation and reporting responsibilities.
+
+---
+
+#### Subtitle H—Financing of Presidential Election Campaigns
+Chapter 95: Presidential Election Campaign Fund
+  Sec. 9001: Establishment of fund.
+  Sec. 9002: Eligibility criteria.
+
+Chapter 96: Presidential Primary Matching Payment Account
+  Sec. 9031: Authorization of matching payments.
+  Sec. 9032: Definitions related to eligibility and matching.
+
+---
+
+#### Subtitle I—Trust Fund Code
+Chapter 98: Trust Fund Code
+  Sec. 9501: Establishment of trust funds.
+  Sec. 9502: Purpose and funding mechanisms.
+
+---
+
+#### Subtitle J—Coal Industry Health Benefits
+Chapter 99: Coal Industry Health Benefits
+  Sec. 9701: Definitions related to coal industry health benefits.
+  Sec. 9702: Establishment of trust funds for health benefits.
+  Sec. 9703: Eligibility and funding provisions.
+
+---
+
+#### Subtitle K—Group Health Plan Requirements
+Chapter 100: Group Health Plan Requirements
+  Sec. 9801: General requirements for group health plans.
+  Sec. 9802: Prohibition of discrimination based on health factors.
+  Sec. 9803: Additional market reforms.
