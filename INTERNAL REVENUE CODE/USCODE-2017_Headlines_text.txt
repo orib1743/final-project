@@ -4,8 +4,49 @@
 Chapter 1: Normal Taxes and Surtaxes
   Subchapter A: Determination of Tax Liability
     Part I: Tax on Individuals
+      Sec. 1 Tax imposed.
+      Sec. 2 Definitions and special rules.
+      Sec. 3 Tax tables for individuals having taxable income of less than $20,000.1
+      Sec. 5 Cross references relating to tax on individuals
     Part II: Tax on Corporations
+      Sec. 11 Tax imposed.
+      Sec. 12 Cross references relating to tax on corporations
     Part III: Changes in Rates During a Taxable Year
+      Sec. 15 Effect of changes
+    Part IV: Credits against tax.
+      Subpart A. Nonrefundable personal credits.
+        Sec. 21 Expenses for household and dependent care services necessary for gainful employment.
+        Sec. 22 Credit for the elderly and the permanently and totally disabled.
+        Sec. 23 Adoption expenses.
+        Sec. 24 Child tax credit.
+        Sec. 25 Interest on certain home mortgages.
+        Sec. 25A Hope and Lifetime Learning credits.
+        Sec. 25B Elective deferrals and IRA contributions by certain individuals.
+        Sec. 25C Nonbusiness energy property.
+        Sec. 25D Residential energy efficient property.
+        Sec. 26 Limitation based on tax liability; definition of tax liability.
+      Subpart B. Other credits.
+        Sec. 27 Taxes of foreign countries and possessions of the United States; possession tax credit.
+        Sec. 30A Puerto Rico economic activity credit.
+        Sec. 30B Alternative motor vehicle credit.
+        Sec. 30C Alternative fuel vehicle refueling property credit.
+        Sec. 30D New qualified plug-in electric drive motor vehicles.
+      Subpart C. Refundable credits.
+        Sec. 31 Tax withheld on wages.
+        Sec. 32 Earned income.
+        Sec. 33 Tax withheld at source on nonresident aliens and foreign corporations.
+        Sec. 34 Certain uses of gasoline and special fuels.
+        Sec. 35 Health insurance costs of eligible individuals.
+        Sec. 36 First-time homebuyer credit.
+        Sec. 36B Refundable credit for coverage under a qualified health plan.
+        Sec. 37 Overpayments of tax.
+###################################################################################
+      Subpart D. Business-related credits.
+      Subpart E. Rules for computing investment credit.
+      Subpart F. Rules for computing work opportunity credit.
+      Subpart G. Credit against regular tax for prior year minimum tax liability.1
+    Part VI: Minimum tax for tax preferences.1
+    Part VII: Base erosion and anti-abuse tax 2
   Subchapter B: Computation of Taxable Income
     Part I: Deductions
     Part II: Exemptions
