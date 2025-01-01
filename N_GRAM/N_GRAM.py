@@ -4,7 +4,7 @@ from collections import Counter
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 
 # Step 1: Read the Excel fileA
-data = pd.read_excel("Extracted_Hierarchy_Data_With_Ending_Check_2017.xlsx")
+data = pd.read_excel("Extracted_Hierarchy_Data_With_Ending_Check_2018.xlsx")
 
 # Step 2: Select relevant columns and create a DataFrame
 hierarchy_data = data[['hierarchy_level', 'hierarchy_level_name']].copy()
@@ -38,7 +38,7 @@ def clean_hierarchy_name_preserve_all_spaces(row):
 hierarchy_data['cleaned_hierarchy_level_name'] = hierarchy_data.apply(clean_hierarchy_name_preserve_all_spaces, axis=1)
 
 # Save the cleaned data to a new Excel file
-cleaned_file_path = "cleaned_hierarchy_data_2017.xlsx"
+cleaned_file_path = "cleaned_hierarchy_data_2018.xlsx"
 hierarchy_data.to_excel(cleaned_file_path, index=False)
 print(f"The cleaned data has been saved to: {cleaned_file_path}")
 
@@ -66,7 +66,7 @@ bigram_df_filtered = pd.DataFrame(
 bigram_df_filtered = bigram_df_filtered.sort_values(by="Frequency", ascending=False).reset_index(drop=True)
 
 # Save the filtered bigram frequencies to a new Excel file
-bigram_filtered_file_path = "bigram_frequency_2017.xlsx"
+bigram_filtered_file_path = "bigram_frequency_2018.xlsx"
 bigram_df_filtered.to_excel(bigram_filtered_file_path, index=False)
 
 print(f"The filtered bigram frequencies have been saved to: {bigram_filtered_file_path}")
