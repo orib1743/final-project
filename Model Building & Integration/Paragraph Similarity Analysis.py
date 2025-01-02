@@ -1,3 +1,6 @@
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
+
 import pandas as pd
 import numpy as np
 import torch
@@ -13,7 +16,8 @@ labse_model = AutoModel.from_pretrained("sentence-transformers/LaBSE")
 labse_model.eval()
 
 # Set device to CUDA if available, else use CPU
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cpu')
 labse_model = labse_model.to(device)
 
 # Function to clean text
@@ -23,6 +27,7 @@ def clean_text(text):
     return re.sub(r"\s+", " ", text).strip()
 
 
+# Function to extract embeddings
 # Function to extract embeddings
 def get_embeddings(texts, tokenizer, model, device):
     tokenized = tokenizer(
@@ -41,15 +46,21 @@ def get_embeddings(texts, tokenizer, model, device):
         embeddings = outputs[1].cpu().numpy()
     return normalize(embeddings)
 
+
 # Load the datasets
-file_2017_path = "C:\\Users\\tomersp10\\Desktop\\Final - Project\\Final-Project\\INTERNAL REVENUE CODE\\Extracted_Data\\Extracted_Hierarchy_Data_With_Paragraph_2017.xlsx"
-file_2018_path = "C:\\Users\\tomersp10\\Desktop\\Final - Project\\Final-Project\\INTERNAL REVENUE CODE\\Extracted_Data\\Extracted_Hierarchy_Data_With_Paragraph_2018.xlsx"
+file_2017_path = "C:\\Users\\תומר סורוז'ון\\Desktop\\לימודים\\Final Project\\Final-Project\\Final-Project\\INTERNAL REVENUE CODE\\Extracted_Data\\Extracted_Hierarchy_Data_With_Paragraph_2017.xlsx"
+file_2018_path = "C:\\Users\\תומר סורוז'ון\\Desktop\\לימודים\\Final Project\\Final-Project\\Final-Project\\INTERNAL REVENUE CODE\\Extracted_Data\\Extracted_Hierarchy_Data_With_Paragraph_2018.xlsx"
+
 data_2017 = pd.read_excel(file_2017_path)
 data_2018 = pd.read_excel(file_2018_path)
 
 # Extract all level 7 paragraphs
 data_2017_paragraphs = data_2017[data_2017['hierarchy_level'] == "7.Paragraph"][['hierarchy_level_name', 'content']]
 data_2018_paragraphs = data_2018[data_2018['hierarchy_level'] == "7.Paragraph"][['hierarchy_level_name', 'content']]
+
+data_2017_paragraphs = data_2017_paragraphs.head(100)  # השתמש רק ב-100 הפסקאות הראשונות
+data_2018_paragraphs = data_2018_paragraphs.head(100)
+
 
 # Prepare results containers
 semantic_results_2017_to_2018 = []
@@ -116,9 +127,10 @@ for _, row_2018 in data_2018_paragraphs.iterrows():
         })
 
 # Convert results to DataFrames and export
-pd.DataFrame(semantic_results_2017_to_2018).to_csv('/mnt/data/Semantic_2017_to_2018.csv', index=False)
-pd.DataFrame(lyrical_results_2017_to_2018).to_csv('/mnt/data/Lyrical_2017_to_2018.csv', index=False)
-pd.DataFrame(semantic_results_2018_to_2017).to_csv('/mnt/data/Semantic_2018_to_2017.csv', index=False)
-pd.DataFrame(lyrical_results_2018_to_2017).to_csv('/mnt/data/Lyrical_2018_to_2017.csv', index=False)
+pd.DataFrame(semantic_results_2017_to_2018).to_csv(r"C:\\Users\\תומר סורוז'ון\\Desktop\\Semantic_2017_to_2018.csv", index=False)
+pd.DataFrame(lyrical_results_2017_to_2018).to_csv(r"C:\\Users\\תומר סורוז'ון\\Desktop\\Lyrical_2017_to_2018.csv", index=False)
+pd.DataFrame(semantic_results_2018_to_2017).to_csv(r"C:\\Users\\תומר סורוז'ון\\Desktop\\Semantic_2018_to_2017.csv", index=False)
+pd.DataFrame(lyrical_results_2018_to_2017).to_csv(r"C:\\Users\\תומר סורוז'ון\\Desktop\\Lyrical_2018_to_2017.csv", index=False)
 
 print("Comparison complete. Results saved for both directions.")
+
