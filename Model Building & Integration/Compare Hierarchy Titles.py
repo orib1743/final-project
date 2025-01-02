@@ -29,8 +29,8 @@ def jaccard_similarity(line1, line2):
     return len(intersection) / len(union) if len(union) > 0 else 0.0
 
 # Load the data
-file_2017 = '/mnt/data/Extracted_Hierarchy_Data_With_Ending_Check_2017.xlsx'
-file_2018 = '/mnt/data/Extracted_Hierarchy_Data_With_Ending_Check_2018.xlsx'
+file_2017 = "C:\\Users\\tomersp10\\Desktop\\Final - Project\\Final-Project\\Data Collection & Preprocessing\\Extracted_Hierarchy_Data_With_Ending_Check_2017.xlsx"
+file_2018 = "C:\\Users\\tomersp10\\Desktop\\Final - Project\\Final-Project\\Data Collection & Preprocessing\\Extracted_Hierarchy_Data_With_Ending_Check_2018.xlsx"
 
 data_2017 = pd.read_excel(file_2017)
 data_2018 = pd.read_excel(file_2018)
@@ -43,15 +43,19 @@ JACCARD_THRESHOLD = 0.5
 # All hierarchy levels
 hierarchy_levels = [
     "1.Subtitle", "2.Chapter", "3.Subchapter",
-    "4.Part", "5.Subpart"
+    "4.Part", "5.Subpart", "6.Section"
 ]
 
 results = []
 
+# Comparison: 2018 to 2017
 for current_level in hierarchy_levels:
     # Filter titles at the current hierarchy level
     data_2017_level = data_2017[data_2017['hierarchy_level'] == current_level]
     data_2018_level = data_2018[data_2018['hierarchy_level'] == current_level]
+
+    if data_2017_level.empty or data_2018_level.empty:
+        continue
 
     # Compute embeddings and similarity matrix
     embeddings_2017 = get_embeddings(data_2017_level['hierarchy_level_name'].tolist())
@@ -60,6 +64,9 @@ for current_level in hierarchy_levels:
 
     for i, row_2018 in data_2018_level.iterrows():
         for j, row_2017 in data_2017_level.iterrows():
+            if i >= similarity_matrix.shape[0] or j >= similarity_matrix.shape[1]:
+                continue
+
             semantic_similarity = similarity_matrix[i, j]
             levenshtein_score = levenshtein_distance(row_2018['hierarchy_level_name'], row_2017['hierarchy_level_name'])
             jaccard_score = jaccard_similarity(row_2018['hierarchy_level_name'], row_2017['hierarchy_level_name'])
@@ -81,27 +88,31 @@ for current_level in hierarchy_levels:
                     ]
 
                     # Cartesian product for sublevels
-                    cartesian_product = pd.DataFrame(
-                        list(product(sub_2018['hierarchy_level_name'], sub_2017['hierarchy_level_name'])),
-                        columns=['Sublevel_2018', 'Sublevel_2017']
-                    )
+                    formatted_results = []
+                    for _, sub_2018_row in sub_2018.iterrows():
+                        for _, sub_2017_row in sub_2017.iterrows():
+                            formatted_results.append({
+                                'hierarchy_level_2018': sub_2018_row['hierarchy_level'],
+                                'hierarchy_level_name_2018': sub_2018_row['hierarchy_level_name'],
+                                'last_hierarchy_level_2018': sub_2018_row['last_hierarchy_level'],
+                                'last_hierarchy_level_name_2018': sub_2018_row['last_hierarchy_level_name'],
+                                'title_type_2018': sub_2018_row['title_type'],
+                                'page_number_2018': sub_2018_row['page_number'],
+                                'hierarchy_level_2017': sub_2017_row['hierarchy_level'],
+                                'hierarchy_level_name_2017': sub_2017_row['hierarchy_level_name'],
+                                'last_hierarchy_level_2017': sub_2017_row['last_hierarchy_level'],
+                                'last_hierarchy_level_name_2017': sub_2017_row['last_hierarchy_level_name'],
+                                'title_type_2017': sub_2017_row['title_type'],
+                                'page_number_2017': sub_2017_row['page_number'],
+                                'Semantic_Similarity': semantic_similarity,
+                                'Levenshtein_Distance': levenshtein_score,
+                                'Jaccard_Similarity': jaccard_score
+                            })
 
-                    # Save results
-                    results.append({
-                        'Current_Level': current_level,
-                        'Title_2018': row_2018['hierarchy_level_name'],
-                        'Title_2017': row_2017['hierarchy_level_name'],
-                        'Semantic_Similarity': semantic_similarity,
-                        'Levenshtein_Distance': levenshtein_score,
-                        'Jaccard_Similarity': jaccard_score,
-                        'Sublevel_Comparison': cartesian_product
-                    })
+                    results.extend(formatted_results)
 
 # Export results
-output_path = '/mnt/data/full_hierarchy_comparison.xlsx'
-with pd.ExcelWriter(output_path) as writer:
-    for index, result in enumerate(results):
-        sheet_name = f"{result['Current_Level']}_Match_{index+1}"
-        result['Sublevel_Comparison'].to_excel(writer, sheet_name=sheet_name, index=False)
+output_path = "C:\\Users\\tomersp10\\Desktop\\Final - Project\\Final-Project\\Output_Files\\Extract_Data_Compare\\full_hierarchy_comparison.xlsx"
+pd.DataFrame(results).to_excel(output_path, index=False)
 
 print(f"Results exported to {output_path}")
