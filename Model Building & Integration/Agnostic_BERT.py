@@ -1,3 +1,4 @@
+import pandas as pd
 from transformers import AutoTokenizer, AutoModel
 import torch
 import numpy as np
@@ -20,16 +21,22 @@ labse_model = labse_model.to(device)
 def clean_headlines(headlines):
     return [re.sub(r"Sec\.\s*\d+:", "", line).strip() for line in headlines]
 
-# Load headlines
-with open("D:\\yifat\\Final_Project\\INTERNAL REVENUE CODE\\USCODE-2017_Headlines_text.txt", "r", encoding="utf-8") as f1:
-    headlines17 = [line.strip() for line in f1.readlines()]
+# Paths to the Excel files
+file_2017_path = "D:\\yifat\\Final_Project\\Data Collection & Preprocessing\\Extracted_Hierarchy_Data_With_Word_Count_2017.xlsx"
+file_2018_path = "D:\\yifat\\Final_Project\\Data Collection & Preprocessing\\Extracted_Hierarchy_Data_With_Word_Count_2018.xlsx"
 
-with open("D:\\yifat\\Final_Project\\INTERNAL REVENUE CODE\\USCODE-2018_Headlines_text.txt", "r", encoding="utf-8") as f2:
-    headlines18 = [line.strip() for line in f2.readlines()]
+# Update the load function to include hierarchy levels and headlines
+def load_headlines_with_levels(file_path):
+    df = pd.read_excel(file_path)
+    hierarchy_levels = df["hierarchy_level"].dropna().tolist()
+    headlines = df["hierarchy_level_name"].dropna().tolist()
+    cleaned_headlines = clean_headlines(headlines)
+    return hierarchy_levels, cleaned_headlines
 
-# Clean the headlines to remove "Sec." numbers
-cleaned_headlines17 = clean_headlines(headlines17)
-cleaned_headlines18 = clean_headlines(headlines18)
+# Load and clean the headlines with hierarchy levels
+hierarchy_levels_2017, cleaned_headlines17 = load_headlines_with_levels(file_2017_path)
+hierarchy_levels_2018, cleaned_headlines18 = load_headlines_with_levels(file_2018_path)
+
 
 # Sentence embedding function
 def get_embeddings(emb_list):
@@ -66,41 +73,41 @@ def jaccard_similarity(line1, line2):
         return 0.0  # return 0, if so
     return len(intersection) / len(union)  # Calc Jaccard Similarity
 
-# Initialize unmatched lists
-unmatched_semantics_18_to_17 = []  # For unmatched headlines from 2018 to 2017
-unmatched_semantics_17_to_18 = []  # For unmatched headlines from 2017 to 2018
-matched_results = []  # For matched headlines with similarity scores
+# Initialize results lists
+matched_results = []  # Matched results with all required data
+unmatched_semantics_18_to_17 = []  # Unmatched from 2018 to 2017
+unmatched_semantics_17_to_18 = []  # Unmatched from 2017 to 2018
+
 
 # Compare embeddings and text
-# Compare 2018 -> 2017 (One direction)
-for i, line18 in enumerate(cleaned_headlines18):  # Iterate over 2018 cleaned headlines
+# Compare embeddings and generate results
+for i, (level18, line18) in enumerate(zip(hierarchy_levels_2018, cleaned_headlines18)):
     matched = False
 
-    for j, line17 in enumerate(cleaned_headlines17):  # Iterate over 2017 cleaned headlines
+    for j, (level17, line17) in enumerate(zip(hierarchy_levels_2017, cleaned_headlines17)):
         semantic_score = semantic_similarity[i][j]
         levenshtein_score = levenshtein_distance(line18, line17)
         jaccard_score = jaccard_similarity(line18, line17)
 
-        # If any metric meets the threshold, consider it a match
         if semantic_score >= SEMANTIC_THRESHOLD or levenshtein_score <= LEVENSHTEIN_THRESHOLD or jaccard_score >= JACCARD_THRESHOLD:
             matched = True
             matched_results.append({
-                "2018": line18,
-                "2017": line17,
+                "2018 Headline": line18,
+                "2018 hierarchy_level": level18,
+                "2017 Headline": line17,
+                "2017 hierarchy_level": level17,
                 "Semantic Similarity": semantic_score,
                 "Levenshtein Distance": levenshtein_score,
-                "Jaccard Similarity": jaccard_score
+                "Jaccard Similarity": jaccard_score,
             })
 
     if not matched:
-        unmatched_semantics_18_to_17.append(line18)
+        unmatched_semantics_18_to_17.append({"2018 Headline": line18, "2018 hierarchy_level": level18})
 
-
-# Compare 2017 -> 2018 (reverse direction)
-for j, line17 in enumerate(cleaned_headlines17):  # Iterate over 2017 cleaned headlines
+for j, (level17, line17) in enumerate(zip(hierarchy_levels_2017, cleaned_headlines17)):
     matched = False
 
-    for i, line18 in enumerate(cleaned_headlines18):  # Iterate over 2018 cleaned headlines
+    for i, (level18, line18) in enumerate(zip(hierarchy_levels_2018, cleaned_headlines18)):
         semantic_score = semantic_similarity[i][j]
         levenshtein_score = levenshtein_distance(line17, line18)
         jaccard_score = jaccard_similarity(line17, line18)
@@ -109,74 +116,69 @@ for j, line17 in enumerate(cleaned_headlines17):  # Iterate over 2017 cleaned he
             matched = True
 
     if not matched:
-        unmatched_semantics_17_to_18.append(line17)
+        unmatched_semantics_17_to_18.append({"2017 Headline": line17, "2017 hierarchy_level": level17})
+
 
 # Print unmatched results
-print(f"\nNumber of lines from 2018 with no semantic match in 2017: {len(unmatched_semantics_18_to_17)}")
-print("Lines from 2018 with no semantic match in 2017:")
-for line in unmatched_semantics_18_to_17:
-    print(f"- {line}")
+def print_unmatched_results(unmatched_18_to_17, unmatched_17_to_18):
+    print(f"\nNumber of lines from 2018 with no semantic match in 2017: {len(unmatched_18_to_17)}")
+    print("Lines from 2018 with no semantic match in 2017:")
+    for entry in unmatched_18_to_17:
+        print(f"- 2018 Headline: {entry['2018 Headline']}\n  2018 hierarchy_level: {entry['2018 hierarchy_level']}\n")
 
-print(f"\nNumber of lines from 2017 with no semantic match in 2018: {len(unmatched_semantics_17_to_18)}")
-print("Lines from 2017 with no semantic match in 2018:")
-for line in unmatched_semantics_17_to_18:
-    print(f"- {line}")
+    print(f"\nNumber of lines from 2017 with no semantic match in 2018: {len(unmatched_17_to_18)}")
+    print("Lines from 2017 with no semantic match in 2018:")
+    for entry in unmatched_17_to_18:
+        print(f"- 2017 Headline: {entry['2017 Headline']}\n  2017 hierarchy_level: {entry['2017 hierarchy_level']}\n")
 
-# Print matched results
-# Print matched results
-print(f"\nNumber of matched lines: {len(matched_results)}")
-print("Matched lines with similarity scores:")
-for match in matched_results:
-    print(f"- 2018: {match['2018']}\n  2017: {match['2017']}\n"
-          f"  Semantic Similarity: {match['Semantic Similarity']:.2f}\n"
-          f"  Levenshtein Distance: {match['Levenshtein Distance']}\n"
-          f"  Jaccard Similarity: {match['Jaccard Similarity']:.2f}\n")
+print_unmatched_results(unmatched_semantics_18_to_17, unmatched_semantics_17_to_18)
 
-
-# Export results to files
-# Define output file paths
+# Write results to CSV
 output_dir = "D:\\yifat\\Final_Project\\Output_Files"
-txt_output_path = os.path.join(output_dir, "comparison_results.txt")
-csv_output_path = os.path.join(output_dir, "matched_results.csv")
-
-# Create the output directory if it doesn't exist
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
-
-# Write results to a text file
-with open(txt_output_path, "w", encoding="utf-8") as txt_file:
-    # Unmatched results from 2018 to 2017
-    txt_file.write(f"Number of lines from 2018 with no semantic match in 2017: {len(unmatched_semantics_18_to_17)}\n")
-    txt_file.write("Lines from 2018 with no semantic match in 2017:\n")
-    for line in unmatched_semantics_18_to_17:
-        txt_file.write(f"- {line}\n")
-    txt_file.write("\n")
-
-    # Unmatched results from 2017 to 2018
-    txt_file.write(f"Number of lines from 2017 with no semantic match in 2018: {len(unmatched_semantics_17_to_18)}\n")
-    txt_file.write("Lines from 2017 with no semantic match in 2018:\n")
-    for line in unmatched_semantics_17_to_18:
-        txt_file.write(f"- {line}\n")
-    txt_file.write("\n")
-
-    # Matched results summary
-    txt_file.write(f"Number of matched lines: {len(matched_results)}\n")
-    txt_file.write("Matched lines with similarity scores:\n")
-    for match in matched_results:
-        txt_file.write(f"- 2018: {match['2018']}\n  2017: {match['2017']}\n"
-                       f"  Semantic Similarity: {match['Semantic Similarity']:.2f}\n"
-                       f"  Levenshtein Distance: {match['Levenshtein Distance']}\n"
-                       f"  Jaccard Similarity: {match['Jaccard Similarity']:.2f}\n")
-        txt_file.write("\n")
-
-# Write matched results to a CSV file
+csv_output_path = os.path.join(output_dir, "matched_results_with_levels.csv")
 with open(csv_output_path, "w", newline="", encoding="utf-8") as csv_file:
     csv_writer = csv.writer(csv_file)
-    # Write header
-    csv_writer.writerow(["2018 Headline", "2017 Headline", "Semantic Similarity", "Levenshtein Distance", "Jaccard Similarity"])
-    # Write matched results
+    csv_writer.writerow(["2018 Headline", "2018 hierarchy_level", "2017 Headline", "2017 hierarchy_level",
+                          "Semantic Similarity", "Levenshtein Distance", "Jaccard Similarity"])
     for match in matched_results:
-        csv_writer.writerow([match["2018"], match["2017"], f"{match['Semantic Similarity']:.2f}",
-                             match["Levenshtein Distance"], f"{match['Jaccard Similarity']:.2f}"])
+        csv_writer.writerow([
+            match["2018 Headline"],
+            match["2018 hierarchy_level"],
+            match["2017 Headline"],
+            match["2017 hierarchy_level"],
+            f"{match['Semantic Similarity']:.2f}",
+            match["Levenshtein Distance"],
+            f"{match['Jaccard Similarity']:.2f}"
+        ])
 
-print(f"Results have been exported to:\n- {txt_output_path}\n- {csv_output_path}")
+print(f"Results have been exported to: {csv_output_path}")
+
+# Define output path for unmatched results
+unmatched_csv_output_path = os.path.join(output_dir, "unmatched_results.csv")
+
+# Write unmatched results to a CSV file
+with open(unmatched_csv_output_path, "w", newline="", encoding="utf-8") as csv_file:
+    csv_writer = csv.writer(csv_file)
+    # Write header for unmatched results
+    csv_writer.writerow(["Year", "Headline", "Hierarchy Level", "Unmatched Direction"])
+
+    # Write unmatched results from 2018 to 2017
+    for entry in unmatched_semantics_18_to_17:
+        csv_writer.writerow([
+            "2018",
+            entry["2018 Headline"],
+            entry["2018 hierarchy_level"],
+            "2018 -> 2017"
+        ])
+
+    # Write unmatched results from 2017 to 2018
+    for entry in unmatched_semantics_17_to_18:
+        csv_writer.writerow([
+            "2017",
+            entry["2017 Headline"],
+            entry["2017 hierarchy_level"],
+            "2017 -> 2018"
+        ])
+
+print(f"Unmatched results have been exported to: {unmatched_csv_output_path}")
+
