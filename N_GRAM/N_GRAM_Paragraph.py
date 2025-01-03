@@ -71,7 +71,7 @@ def main(file_path, n, output_file):
 
 if __name__ == "__main__":
     # Specify the file path, n for n-grams, and output file path
-    file_path = "Paragraphs 2018.txt"  # Replace with your file path
+    file_path = "Paragraphs 2017.txt"  # Replace with your file path
     n = 3  # Change n to the desired value for n-grams
-    output_file = "ngrams_paragraph_frequencies_2018.xlsx"  # Replace with your desired output file path
+    output_file = "ngrams_paragraph_frequencies_2017.xlsx"  # Replace with your desired output file path
     main(file_path, n, output_file)
