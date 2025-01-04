@@ -16,18 +16,18 @@ with PdfPages(output_pdf_path) as pdf:
     files = {
         "2017": {
             "title": r"C:\Users\אורי בראל\PycharmProjects\Final-Project\N_GRAM\ngrams_results_2017.csv",
-            "detailed": r"C:\Users\אורי בראל\PycharmProjects\Final-Project\N_GRAM\new_Paragraph_ngrams_frequencies_2017.csv"
+            "detailed": r"C:\Users\אורי בראל\PycharmProjects\Final-Project\N_GRAM\cleaned_Paragraph_ngrams_frequencies_2017_v2.xlsx"
         },
         "2018": {
             "title": r"C:\Users\אורי בראל\PycharmProjects\Final-Project\N_GRAM\ngrams_results_2018.csv",
-            "detailed": r"C:\Users\אורי בראל\PycharmProjects\Final-Project\N_GRAM\new_Paragraph_ngrams_frequencies_2018.csv"
+            "detailed": r"C:\Users\אורי בראל\PycharmProjects\Final-Project\N_GRAM\cleaned_Paragraph_ngrams_frequencies_2018_v2.xlsx"
         }
     }
 
     # Additional Excel files for bigram data
     bigram_files = {
-        "2017": r"C:\Users\אורי בראל\PycharmProjects\Final-Project\N_GRAM\bigram_frequency_2017.xlsx",
-        "2018": r"C:\Users\אורי בראל\PycharmProjects\Final-Project\N_GRAM\bigram_frequency_2018.xlsx"
+        "2017": r"C:\Users\אורי בראל\PycharmProjects\Final-Project\N_GRAM\Titles_N_GRAM\cleaned_bigram_frequency_2017_v2.xlsx",
+        "2018": r"C:\Users\אורי בראל\PycharmProjects\Final-Project\N_GRAM\Titles_N_GRAM\cleaned_bigram_frequency_2018_v2.xlsx"
     }
 
     # Loading the data
@@ -37,16 +37,17 @@ with PdfPages(output_pdf_path) as pdf:
 
     for year, paths in files.items():
         dfs_title[year] = pd.read_csv(paths["title"], encoding='latin1')
-        dfs_detailed[year] = pd.read_csv(paths["detailed"], encoding='latin1')
+        dfs_detailed[year] = pd.read_excel(paths["detailed"])
 
     for year, path in bigram_files.items():
         dfs_bigram[year] = pd.read_excel(path)
 
     # Standardize column names for detailed and bigram files
     for year in dfs_detailed:
-        dfs_detailed[year].columns = ["Ngram", "Frequency"]
+        dfs_detailed[year].columns = ["Ngram", "Frequency", "Cleaned Ngram"]  # Adjusted to three columns
+
     for year in dfs_bigram:
-        dfs_bigram[year].columns = ["Bigram", "Frequency"]
+        dfs_bigram[year].columns = ["Bigram", "Frequency", "Cleaned Bigram"]  # Adjusted to three columns
 
     # Add general summary table to the PDF
     summary_data = []
@@ -89,7 +90,7 @@ with PdfPages(output_pdf_path) as pdf:
     )
     pdf.savefig(fig)
     plt.close()
-
+    """"
     # Add top Ngrams by Title_Type for each year
     for year, df in dfs_detailed.items():
         top_ngrams = df.nlargest(10, 'Frequency')[['Ngram', 'Frequency']]
@@ -107,6 +108,7 @@ with PdfPages(output_pdf_path) as pdf:
         ax.set_title(f"Top 10 Ngrams for {year}", fontsize=14)
         pdf.savefig(fig)
         plt.close()
+    """
 
     # 1. Bar plots: Total Rows
     fig, axes = plt.subplots(1, 2, figsize=(16, 6), sharey=True)
@@ -157,7 +159,7 @@ with PdfPages(output_pdf_path) as pdf:
     plt.tight_layout()
     pdf.savefig(fig)
     plt.close()
-
+    """""
     # Compare top 10 Ngrams: 2017 in 2018
     top_ngrams_2017 = dfs_detailed["2017"].nlargest(10, 'Frequency')[['Ngram', 'Frequency']]
     ngrams_2017 = top_ngrams_2017['Ngram']
@@ -203,7 +205,7 @@ with PdfPages(output_pdf_path) as pdf:
     plt.tight_layout()
     pdf.savefig(fig)
     plt.close()
-
+    """
     # Compare top 10 Bigrams: 2017 in 2018
     top_bigrams_2017 = dfs_bigram["2017"].nlargest(10, 'Frequency')[['Bigram', 'Frequency']]
     bigrams_2017 = top_bigrams_2017['Bigram']
