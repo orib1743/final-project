@@ -43,7 +43,7 @@ def visualize_and_save_clusters(clusters, year, output_folder):
         # Save the word cloud as an image file
         file_name = os.path.join(output_folder, f"Year_{year}_Cluster_{cluster_id}.png")
         wordcloud.to_file(file_name)
-    print(f"Word cloud saved: {file_name}")
+        #print(f"Word cloud saved: {file_name}")
 
 # File paths
 file_path_2017 = r'C:\Users\revit\PycharmProjects\DS_project\Final-Project\Data Collection & Preprocessing\Extracted_Hierarchy_Content_2017.xlsx'
