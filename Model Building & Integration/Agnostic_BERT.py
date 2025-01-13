@@ -22,8 +22,8 @@ def clean_headlines(headlines):
     return [re.sub(r"Sec\.\s*\d+:", "", line).strip() for line in headlines]
 
 # Paths to the Excel files
-file_2017_path = r"C:\Users\tomersp10\Desktop\Final - Project\Final-Project\Data Collection & Preprocessing\Extracted_Hierarchy_Data_With_Word_Count_2017.xlsx"
-file_2018_path = r"C:\Users\tomersp10\Desktop\Final - Project\Final-Project\Data Collection & Preprocessing\Extracted_Hierarchy_Data_With_Word_Count_2018.xlsx"
+file_2017_path = r"D:\yifat\Final_Project\Data Collection & Preprocessing\Extracted_Hierarchy_Content_2017.xlsx"
+file_2018_path = r"D:\yifat\Final_Project\Data Collection & Preprocessing\Extracted_Hierarchy_Content_2017.xlsx"
 
 # Update the load function to include hierarchy levels and headlines
 def load_headlines_with_levels(file_path):
@@ -134,7 +134,7 @@ def print_unmatched_results(unmatched_18_to_17, unmatched_17_to_18):
 print_unmatched_results(unmatched_semantics_18_to_17, unmatched_semantics_17_to_18)
 
 # Write results to CSV
-output_dir = r"C:\Users\tomersp10\Desktop\Final - Project\Final-Project\Output_Files"
+output_dir = r"D:\yifat\Final_Project\Output_Files"
 csv_output_path = os.path.join(output_dir, "matched_results_with_levels.csv")
 with open(csv_output_path, "w", newline="", encoding="utf-8") as csv_file:
     csv_writer = csv.writer(csv_file)
