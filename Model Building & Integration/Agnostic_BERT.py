@@ -22,8 +22,8 @@ def clean_headlines(headlines):
     return [re.sub(r"Sec\.\s*\d+:", "", line).strip() for line in headlines]
 
 # Paths to the Excel files
-file_2017_path = r"D:\yifat\Final_Project\Data Collection & Preprocessing\Extracted_Hierarchy_Content_2017.xlsx"
-file_2018_path = r"D:\yifat\Final_Project\Data Collection & Preprocessing\Extracted_Hierarchy_Content_2017.xlsx"
+file_2017_path = r"D:\yifat\Final_Project\Data Collection & Preprocessing\Extracted_Hierarchy_Content_2017_fixed.xlsx"
+file_2018_path = r"D:\yifat\Final_Project\Data Collection & Preprocessing\Extracted_Hierarchy_Content_2018_fixed.xlsx"
 
 # Update the load function to include hierarchy levels and headlines
 def load_headlines_with_levels(file_path):
