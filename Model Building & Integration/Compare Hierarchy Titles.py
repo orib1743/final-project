@@ -10,8 +10,13 @@ tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/LaBSE")
 model = AutoModel.from_pretrained("sentence-transformers/LaBSE")
 
 # Set device
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
 model.to(device)
+
+
+
+
 
 # Text cleaning function
 def clean_text(text):
@@ -36,12 +41,12 @@ def get_embeddings(text):
     return embeddings
 
 # Load the matched results dataset
-matched_results_path = r"C:\Users\tomersp10\Desktop\Final - Project\Final-Project\Output_Files\matched_results_with_levels.csv"
+matched_results_path = r"C:\Users\תומר סורוז'ון\Desktop\לימודים\Final Project\Final-Project\Output_Files\matched_results_with_levels.csv"
 matched_results_df = pd.read_csv(matched_results_path)
 
 # Load additional datasets
-file_2017_path = r"C:\Users\tomersp10\Desktop\Final - Project\Final-Project\Data Collection & Preprocessing\Extracted_Hierarchy_Data_With_Ending_Check_2017.xlsx"
-file_2018_path = r"C:\Users\tomersp10\Desktop\Final - Project\Final-Project\Data Collection & Preprocessing\Extracted_Hierarchy_Data_With_Ending_Check_2018.xlsx"
+file_2017_path = r"C:\Users\תומר סורוז'ון\Desktop\לימודים\Final Project\Final-Project\Data Collection & Preprocessing\Extracted_Hierarchy_Data_With_Ending_Check_2017.xlsx"
+file_2018_path = r"C:\Users\תומר סורוז'ון\Desktop\לימודים\Final Project\\\Final-Project\Data Collection & Preprocessing\Extracted_Hierarchy_Data_With_Ending_Check_2018.xlsx"
 
 df_2017 = pd.read_excel(file_2017_path)
 df_2018 = pd.read_excel(file_2018_path)
@@ -105,7 +110,7 @@ for _, row in matched_results_df.iterrows():
 
 # Create DataFrame and save to CSV
 results_df = pd.DataFrame(all_comparisons)
-output_path = r"C:\Users\tomersp10\Desktop\Final - Project\Final-Project\Output_Files\child_level_comparison_02.csv"
+output_path = r"C:\Users\תומר סורוז'ון\Desktop\לימודים\Final Project\Final-Project\Output_Files\child_level_comparison_02.csv"
 results_df.to_csv(output_path, index=False)
 
 print("Results saved successfully!")
