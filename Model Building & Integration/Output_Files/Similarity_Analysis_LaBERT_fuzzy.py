@@ -20,7 +20,6 @@ titles_2018 = list(df_2018_clean['hierarchy_level_name'])
 
 model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
 
-
 def find_best_match(title, candidates, threshold=80):
     """ מחפש את ההתאמה הטובה ביותר בעזרת fuzzywuzzy ובמידת הצורך BERT """
     best_match = None
@@ -119,16 +118,29 @@ content_2018 = {row['hierarchy_level_name']: split_text(row['content']) for _, r
                 row['hierarchy_level_name'] in matched_titles.values()}
 
 
-def compute_similarity(chunks_2017, chunks_2018):
-    """ מחשב דמיון בין רשימות של קטעי טקסט, מחזיר גם את הפסקאות השונות ביותר """
+def compute_similarity(chunks_2017, chunks_2018, threshold=0.6):
+    """ מחשב דמיון בין רשימות של קטעי טקסט, מחזיר גם את הפסקאות השונות ביותר, אך מסנן התאמות לא רלוונטיות """
     embeddings_2017 = model.encode(chunks_2017, convert_to_tensor=True)
     embeddings_2018 = model.encode(chunks_2018, convert_to_tensor=True)
 
     similarity_matrix = util.pytorch_cos_sim(embeddings_2017, embeddings_2018).cpu().numpy()
-    min_index = np.unravel_index(np.argmin(similarity_matrix, axis=None), similarity_matrix.shape)
 
-    return np.mean(similarity_matrix), similarity_matrix, chunks_2017[min_index[0]], chunks_2018[min_index[1]]
+    # הגבלת החיפוש להתאמות מעל סף מסוים
+    valid_similarities = np.where(similarity_matrix >= threshold, similarity_matrix, np.nan)
 
+    if np.isnan(valid_similarities).all():
+        # אם אין התאמות מעל הסף, נבחר את המינימום בלי סינון
+        min_index = np.unravel_index(np.argmin(similarity_matrix, axis=None), similarity_matrix.shape)
+    else:
+        # נמצא את ההתאמה הכי חלשה מתוך ההתאמות הרלוונטיות
+        min_index = np.unravel_index(np.nanargmin(valid_similarities, axis=None), similarity_matrix.shape)
+
+    return (
+        np.mean(similarity_matrix),  # דמיון ממוצע כולל
+        similarity_matrix,  # מטריצת הדמיון
+        chunks_2017[min_index[0]],  # הפסקה שהשתנתה הכי הרבה מ-2017
+        chunks_2018[min_index[1]]  # הפסקה שהשתנתה הכי הרבה מ-2018
+    )
 
 # חישוב הדמיון לכל סעיף
 similarities = []
