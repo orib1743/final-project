@@ -4,11 +4,14 @@ import numpy as np
 from rapidfuzz import fuzz
 import matplotlib.pyplot as plt
 from sklearn.metrics import precision_score, recall_score, f1_score
+import os
+
 import openai
+print("OpenAI module is installed correctly!")
 
 # טען את הנתונים
-file_2017_path = "Extracted_Hierarchy_Content_2017_fixed.xlsx"
-file_2018_path = "Extracted_Hierarchy_Content_2018_fixed.xlsx"
+file_2017_path = r"C:\Users\yifat\PycharmProjects\Final-Project\Data Collection & Preprocessing\Extracted_Hierarchy_Content_2017_fixed.xlsx"
+file_2018_path = r"C:\Users\yifat\PycharmProjects\Final-Project\Data Collection & Preprocessing\Extracted_Hierarchy_Content_2018_fixed.xlsx"
 
 df_2017 = pd.read_excel(file_2017_path)
 df_2018 = pd.read_excel(file_2018_path)
@@ -24,6 +27,8 @@ titles_2018 = list(df_2018_clean['hierarchy_level_name'])
 models = {
     "Agnostic BERT": SentenceTransformer("sentence-transformers/all-mpnet-base-v2"),
     "RoBERTa": SentenceTransformer("sentence-transformers/all-roberta-large-v1"),
+    #"DeBERTa": SentenceTransformer("sentence-transformers/deberta-v3-base"),
+    #"DeBERTa": SentenceTransformer("microsoft/deberta-v3-small"),
     "DeBERTa": SentenceTransformer("microsoft/deberta-v3-large"),
     "SimCSE": SentenceTransformer("princeton-nlp/sup-simcse-roberta-large")
 }
@@ -49,7 +54,7 @@ def find_best_match(title, candidates, model, threshold=80):
 
 def evaluate_model(model_name, model):
     matched_titles = {}
-    title_pairs, fuzzy_scores, bert_scores = [], [], []
+    title_pairs, fuzzy_scores, bert_scores, gpt_differences = [], [], [], []
 
     for title in titles_2017:
         best_match, fw_score, bert_score = find_best_match(title, titles_2018, model)
@@ -59,14 +64,24 @@ def evaluate_model(model_name, model):
             fuzzy_scores.append(fw_score)
             bert_scores.append(bert_score)
 
+            # השוואת טקסטים באמצעות GPT-4
+            text_2017 = df_2017_clean[df_2017_clean['hierarchy_level_name'] == title]['content'].values[0]
+            text_2018 = df_2018_clean[df_2018_clean['hierarchy_level_name'] == best_match]['content'].values[0]
+            gpt_difference = compare_texts_with_gpt(text_2017, text_2018)
+            gpt_differences.append(gpt_difference)
+
     df_results = pd.DataFrame(title_pairs, columns=["Title 2017", "Title 2018"])
     df_results["Fuzzy Score"] = fuzzy_scores
     df_results["BERT Similarity"] = bert_scores
+    df_results["GPT Differences"] = gpt_differences
 
     return df_results
 
 
 # הוספת השוואה באמצעות GPT-4
+openai.api_key = os.getenv("OPENAI_API_KEY")  # יש להגדיר את ה-API key בסביבת המשתמש
+
+
 def compare_texts_with_gpt(text1, text2):
     response = openai.ChatCompletion.create(
         model="gpt-4",
