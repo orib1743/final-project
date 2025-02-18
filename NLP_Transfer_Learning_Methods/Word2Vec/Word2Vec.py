@@ -46,8 +46,8 @@ def visualize_and_save_clusters(clusters, year, output_folder):
         #print(f"Word cloud saved: {file_name}")
 
 # File paths
-file_path_2017 = r'C:\Users\revit\PycharmProjects\DS_project\Final-Project\Data Collection & Preprocessing\Extracted_Hierarchy_Content_2017.xlsx'
-file_path_2018 = r'C:\Users\revit\PycharmProjects\DS_project\Final-Project\Data Collection & Preprocessing\Extracted_Hierarchy_Content_2018.xlsx'
+file_path_2017 = r'C:\Users\revit\PycharmProjects\DS_project\Final-Project\Data Collection & Preprocessing\Extracted_Hierarchy_Content_2017_fixed.xlsx'
+file_path_2018 = r'C:\Users\revit\PycharmProjects\DS_project\Final-Project\Data Collection & Preprocessing\Extracted_Hierarchy_Content_2018_fixed.xlsx'
 
 # Load and preprocess data
 data_2017 = pd.read_excel(file_path_2017)
