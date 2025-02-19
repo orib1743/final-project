@@ -11,6 +11,8 @@ import json
 import hashlib
 import torch
 
+torch.cuda.empty_cache()
+torch.cuda.memory_allocated()
 
 import openai
 print("OpenAI module is installed correctly!")
@@ -54,10 +56,18 @@ titles_2018 = list(df_2018_clean['hierarchy_level_name'])
 deberta_tokenizer = DebertaV2Tokenizer.from_pretrained("microsoft/deberta-v3-large")
 deberta_model = AutoModel.from_pretrained("microsoft/deberta-v3-large")
 
+#model_name_mistral = "open-mistral/mistral-7b"
 #model_name_mistral = "mistralai/Mistral-7B-Instruct-v0.2"
-model_name_mistral = "open-mistral/mistral-7b"
-mistral_tokenizer = AutoTokenizer.from_pretrained(model_name_mistral)
-mistral_model = AutoModelForCausalLM.from_pretrained(model_name_mistral, torch_dtype="auto", device_map="auto")
+#mistral_model = AutoModelForCausalLM.from_pretrained(model_name_mistral, torch_dtype=torch.float16).to("cuda")
+#mistral_model = AutoModelForCausalLM.from_pretrained(model_name_mistral, torch_dtype=torch.float16, device_map="auto")
+#mistral_tokenizer = AutoTokenizer.from_pretrained(model_name_mistral)
+
+# ✅ בדיקה שהמודל אכן נטען ל-GPU
+import torch
+print(f"🔍 GPU available: {torch.cuda.is_available()}")
+print(f"🔢 Number of GPUs: {torch.cuda.device_count()}")
+print(f"🎮 Using GPU: {torch.cuda.get_device_name(0)}")
+#print(f"🚀 Model is on: {mistral_model.device}")
 
 # הגדרת המודלים להשוואה
 models = {
@@ -67,20 +77,20 @@ models = {
     "SimCSE": SentenceTransformer("princeton-nlp/sup-simcse-roberta-large")
 }
 
-def compare_texts_with_mistral(text1, text2):
-    """
-    השוואת טקסטים באמצעות Mistral 7B-Instruct
-    """
-    prompt = f"Compare the following legal texts:\n\nText 1: {text1}\n\nText 2: {text2}\n\nSummarize the main differences:"
+#def compare_texts_with_mistral(text1, text2):
+#    """
+#    השוואת טקסטים באמצעות Mistral 7B-Instruct, תוך חיסכון בזיכרון
+#    """
+#    prompt = f"Compare the following legal texts:\n\nText 1: {text1}\n\nText 2: {text2}\n\nSummarize the main differences:"
 
-    inputs = mistral_tokenizer(prompt, return_tensors="pt").to(
-        "cuda" if torch.cuda.is_available() else "cpu")  # המרה ל-GPU אם אפשרי
-    with torch.no_grad():
-        #outputs = mistral_model.generate(**inputs, max_new_tokens=300, do_sample=True, top_k=50, temperature=0.7)
-        outputs = mistral_model.generate(**inputs, max_new_tokens=50, do_sample=True, top_k=50, temperature=0.7)
+#    inputs = mistral_tokenizer(prompt, return_tensors="pt", truncation=True, max_length=256)
+#    inputs = {k: v.to(mistral_model.device) for k, v in inputs.items()}  # להעביר רק את הקלט ל-GPU
 
-    result = mistral_tokenizer.decode(outputs[0], skip_special_tokens=True)
-    return result
+#    with torch.no_grad():
+#        outputs = mistral_model.generate(**inputs, max_new_tokens=30, use_cache=True)
+
+#    result = mistral_tokenizer.decode(outputs[0], skip_special_tokens=True)
+#    return result
 
 
 def find_best_match(title, candidates, model, tokenizer=None, threshold=80):
@@ -107,7 +117,8 @@ def find_best_match(title, candidates, model, tokenizer=None, threshold=80):
 
 def evaluate_model(model_name, model):
     matched_titles = {}
-    title_pairs, fuzzy_scores, bert_scores, mistral_differences = [], [], [], []
+    #title_pairs, fuzzy_scores, bert_scores, mistral_differences = [], [], [], []
+    title_pairs, fuzzy_scores, bert_scores = [], [], []
 
     # בדיקה אם זה מודל DeBERTa (כי הוא טוען בצורה שונה)
     if isinstance(model, tuple):
@@ -124,10 +135,10 @@ def evaluate_model(model_name, model):
             bert_scores.append(bert_score)
 
             # השוואת טקסטים באמצעות Mistral
-            text_2017 = df_2017_clean[df_2017_clean['hierarchy_level_name'] == title]['content'].values[0]
-            text_2018 = df_2018_clean[df_2018_clean['hierarchy_level_name'] == best_match]['content'].values[0]
-            mistral_difference = compare_texts_with_mistral(text_2017, text_2018)
-            mistral_differences.append(mistral_difference)
+            #text_2017 = df_2017_clean[df_2017_clean['hierarchy_level_name'] == title]['content'].values[0]
+            #text_2018 = df_2018_clean[df_2018_clean['hierarchy_level_name'] == best_match]['content'].values[0]
+            #mistral_difference = compare_texts_with_mistral(text_2017, text_2018)
+            #mistral_differences.append(mistral_difference)
 
             # השוואת טקסטים באמצעות GPT-4
             #text_2017 = df_2017_clean[df_2017_clean['hierarchy_level_name'] == title]['content'].values[0]
@@ -138,7 +149,7 @@ def evaluate_model(model_name, model):
     df_results = pd.DataFrame(title_pairs, columns=["Title 2017", "Title 2018"])
     df_results["Fuzzy Score"] = fuzzy_scores
     df_results["BERT Similarity"] = bert_scores
-    df_results["Mistral Differences"] = mistral_differences
+    #df_results["Mistral Differences"] = mistral_differences
     #df_results["GPT Differences"] = gpt_differences
 
     return df_results
@@ -214,7 +225,7 @@ for model_name, df in results.items():
     recall = recall_score(df["BERT Similarity"] > 0.8, [True] * len(df), zero_division=0)
     f1 = f1_score(df["BERT Similarity"] > 0.8, [True] * len(df), zero_division=0)
 
-    mistral_diff_length = df["Mistral Differences"].apply(lambda x: len(str(x)) if isinstance(x, str) else 0).mean()
+    #mistral_diff_length = df["Mistral Differences"].apply(lambda x: len(str(x)) if isinstance(x, str) else 0).mean()
 
     # נחשב את מידת ההבדל על בסיס אורך הטקסט שמוחזר מהשוואת GPT (רק אם יש GPT Differences)
     #if "GPT Differences" in df.columns:
@@ -228,8 +239,8 @@ for model_name, df in results.items():
         "Accuracy": accuracy,
         "Precision": precision,
         "Recall": recall,
-        "F1 Score": f1,
-        "Mistral Diff Length": mistral_diff_length
+        "F1 Score": f1
+        #"Mistral Diff Length": mistral_diff_length
         #"GPT Diff Length": gpt_diff_length  # כמה הטקסטים שונים לפי GPT
     }
 
@@ -250,24 +261,29 @@ if not metrics_df.empty:
     # הפרדה בין המדדים של הדיוק והמדדים של ההבדלים של GPT
     #gpt_metric_exists = "GPT Diff Length" in metrics_df.columns
 
-    mistral_metric_exists = "Mistral Diff Length" in metrics_df.columns
+    #mistral_metric_exists = "Mistral Diff Length" in metrics_df.columns
 
     # הצגת מדדי דיוק ודמיון (ללא GPT Diff Length)
     #metrics_no_gpt = metrics_df.drop(columns=["GPT Diff Length"]) if gpt_metric_exists else metrics_df
-    metrics_no_mistral = metrics_df.drop(columns=["Mistral Diff Length"]) if mistral_metric_exists else metrics_df
     #metrics_no_gpt.plot(kind='bar', figsize=(12, 6), title='Model Comparison')
-    metrics_no_mistral.plot(kind='bar', figsize=(12, 6), title='Model Comparison')
-    plt.xticks(rotation=45)
-    plt.ylabel('Score')
-    plt.show()
+    #plt.xticks(rotation=45)
+    #plt.ylabel('Score')
+    #plt.show()
+
+    # Mistral
+    #metrics_no_mistral = metrics_df.drop(columns=["Mistral Diff Length"]) if mistral_metric_exists else metrics_df
+    #metrics_no_mistral.plot(kind='bar', figsize=(12, 6), title='Model Comparison')
+    #plt.xticks(rotation=45)
+    #plt.ylabel('Score')
+    #plt.show()
 
     # אם יש מדדי הבדל של GPT, נציג אותם בנפרד
-    if mistral_metric_exists:  # gpt_metric_exists:
+    #if mistral_metric_exists:  # gpt_metric_exists:
         #metrics_df["GPT Diff Length"].plot(kind='bar', figsize=(12, 6), color='red', title='GPT Difference Length')
-        metrics_df["Mistral Diff Length"].plot(kind='bar', figsize=(12, 6), color='red', title='Mistral Diff Length')
-        plt.xticks(rotation=45)
-        plt.ylabel('Difference Length')
-        plt.show()
+    #    metrics_df["Mistral Diff Length"].plot(kind='bar', figsize=(12, 6), color='red', title='Mistral Diff Length')
+    #    plt.xticks(rotation=45)
+    #    plt.ylabel('Difference Length')
+    #    plt.show()
 
 else:
     print("⚠️ No valid metrics to display.")
