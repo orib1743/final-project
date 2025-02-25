@@ -14,25 +14,21 @@ from collections import Counter
 # הגדרת נתיבים
 file_path_2017 = r'C:\Users\revit\PycharmProjects\DS_project\Final-Project\Data Collection & Preprocessing\Extracted_Hierarchy_Content_2017_fixed.xlsx'
 file_path_2018 = r'C:\Users\revit\PycharmProjects\DS_project\Final-Project\Data Collection & Preprocessing\Extracted_Hierarchy_Content_2018_fixed.xlsx'
-output_path = r'C:\Users\revit\PycharmProjects\DS_project\Final-Project\NLP_Transfer_Learning_Methods\Word2Vec\Combined_Output.xlsx'
 output_folder = r'C:\Users\revit\PycharmProjects\DS_project\Final-Project\NLP_Transfer_Learning_Methods\Word2Vec\Visualizations'
+combined_output_path = r'C:\Users\revit\PycharmProjects\DS_project\Final-Project\NLP_Transfer_Learning_Methods\Word2Vec\Combined_Output.xlsx'
 
 # הגדרת stopwords
 stop_words = set(stopwords.words('english'))
-additional_stop_words = {'title', 'section', 'pub', 'repealed', 'part,', 'chapter', 'subpart', 'subchapter', 'subtitle',
-                         'div'}
+additional_stop_words = {'title', 'section', 'pub', 'repealed', 'part,', 'chapter', 'subpart', 'subchapter', 'subtitle', 'div'}
 stop_words.update(additional_stop_words)
-
 
 # ניקוי וטיוב טקסט
 def clean_content(text):
-    text = re.sub(r'^(subtitle|chapter|subchapter|part|subpart)\s?[a-zA-Z\d]*\s?[–—]', '', text,
-                  flags=re.IGNORECASE).strip()
+    text = re.sub(r'^(subtitle|chapter|subchapter|part|subpart)\s?[a-zA-Z\d]*\s?[–—]', '', text, flags=re.IGNORECASE).strip()
     text = re.sub(r'[–—]', ' ', text)
     text = re.sub(r'[^a-zA-Z\s]', '', text).strip()
     text = re.sub(r'\s+', ' ', text).strip()
     return text
-
 
 # עיבוד נתונים
 def preprocess_and_tokenize(df, content_column):
@@ -43,11 +39,10 @@ def preprocess_and_tokenize(df, content_column):
     print("[INFO] Preprocessing completed.", flush=True)
     return df
 
-
-# פונקציית מטרה לאופטימיזציה
+# פונקציית מטרה לאופטימיזציה (כוללת n_clusters)
 def objective(params, tokens):
-    vector_size, window, min_count, sg = params
-    vector_size, window, min_count, sg = int(vector_size), int(window), int(min_count), int(sg)
+    vector_size, window, min_count, sg, n_clusters = params
+    vector_size, window, min_count, sg, n_clusters = int(vector_size), int(window), int(min_count), int(sg), int(n_clusters)
 
     sampled_tokens = tokens.sample(frac=0.5, random_state=42).tolist()
 
@@ -70,7 +65,10 @@ def objective(params, tokens):
     top_words = [word for word, count in word_counts.most_common(100)]
     word_vectors = [model.wv[word] for word in top_words if word in model.wv]
 
-    kmeans = KMeans(n_clusters=5, random_state=42).fit(word_vectors)
+    if len(word_vectors) < n_clusters:
+        return -1
+
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42).fit(word_vectors)
     labels = kmeans.labels_
 
     if len(set(labels)) > 1:
@@ -79,25 +77,24 @@ def objective(params, tokens):
     else:
         return -1
 
-
-# אופטימיזציה של פרמטרים עם Bayesian Optimization
+# אופטימיזציה של פרמטרים עם Bayesian Optimization (כולל n_clusters)
 def optimize_params(tokens, year):
     print(f"[INFO] Starting Bayesian Optimization for {year}...", flush=True)
     search_space = [
         Integer(50, 100, name='vector_size'),
         Integer(2, 10, name='window'),
         Integer(1, 5, name='min_count'),
-        Integer(0, 1, name='sg')
+        Integer(0, 1, name='sg'),
+        Integer(2, 10, name='n_clusters')  # טווח לאשכולות
     ]
     result = gp_minimize(
         func=lambda params: objective(params, tokens),
         dimensions=search_space,
-        n_calls=10,
+        n_calls=15,
         random_state=42
     )
     print(f"[INFO] Completed Bayesian Optimization for {year}. Best Params: {result.x}", flush=True)
     return result.x
-
 
 # Clustering ו-Word Cloud
 def cluster_and_visualize(tokens, best_params, year):
@@ -109,10 +106,11 @@ def cluster_and_visualize(tokens, best_params, year):
     top_words = [word for word, count in word_counts.most_common(100)]
     word_vectors = [model.wv[word] for word in top_words if word in model.wv]
 
-    kmeans = KMeans(n_clusters=5, random_state=42).fit(word_vectors)
+    optimal_clusters = best_params[4]
+    kmeans = KMeans(n_clusters=optimal_clusters, random_state=42).fit(word_vectors)
     labels = kmeans.labels_
 
-    clusters = {i: [] for i in range(5)}
+    clusters = {i: [] for i in range(optimal_clusters)}
     for i, word in enumerate(top_words):
         if word in model.wv:
             clusters[labels[i]].append(word)
@@ -122,7 +120,15 @@ def cluster_and_visualize(tokens, best_params, year):
         wordcloud = WordCloud(width=800, height=400, background_color="white").generate(' '.join(words))
         file_name = os.path.join(output_folder, f"Year_{year}_Cluster_{cluster_id}.png")
         wordcloud.to_file(file_name)
+        print(f"[INFO] Word Cloud saved: {file_name}")
 
+    # יצירת DataFrame לאקסל
+    combined_data = []
+    for cluster_id, words in clusters.items():
+        for word in words:
+            combined_data.append({'Year': year, 'Cluster': cluster_id, 'Word': word})
+
+    return pd.DataFrame(combined_data)
 
 # === קריאות לפונקציות ===
 print("[INFO] Loading data for 2017 and 2018...", flush=True)
@@ -135,5 +141,9 @@ data_2018 = preprocess_and_tokenize(data_2018, 'content')
 best_params_2017 = optimize_params(data_2017['tokens'], 2017)
 best_params_2018 = optimize_params(data_2018['tokens'], 2018)
 
-cluster_and_visualize(data_2017['tokens'], best_params_2017, 2017)
-cluster_and_visualize(data_2018['tokens'], best_params_2018, 2018)
+df_2017 = cluster_and_visualize(data_2017['tokens'], best_params_2017, 2017)
+df_2018 = cluster_and_visualize(data_2018['tokens'], best_params_2018, 2018)
+
+combined_df = pd.concat([df_2017, df_2018], ignore_index=True)
+combined_df.to_excel(combined_output_path, index=False)
+print(f"[INFO] Combined Output saved at: {combined_output_path}")
