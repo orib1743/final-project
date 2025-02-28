@@ -26,7 +26,6 @@ titles_2018 = list(df_2018_clean['hierarchy_level_name'])
 # רשימת המודלים לאימון
 model_paths = {
     "DeBERTa": "microsoft/deberta-v3-large",
-    #"DeBERTa": "microsoft/deberta-v3-large-finetuned-mnli",
     "BERT": "bert-base-uncased",
     "RoBERTa": "roberta-large",
     "SimCSE": "princeton-nlp/sup-simcse-roberta-large"

@@ -1,7 +1,7 @@
 import pandas as pd
 import torch
 from torch.utils.data import Dataset, DataLoader
-from transformers import DebertaV2Tokenizer, AutoModelForSequenceClassification, AdamW, get_scheduler
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, AdamW, get_scheduler
 from sentence_transformers import SentenceTransformer, util
 from rapidfuzz import fuzz
 import numpy as np
@@ -21,13 +21,14 @@ df_2018_clean = df_2018.dropna(subset=['hierarchy_level_name', 'content'])
 titles_2017 = list(df_2017_clean['hierarchy_level_name'])
 titles_2018 = list(df_2018_clean['hierarchy_level_name'])
 
-# שימוש במודל שעבר Fine-Tuning
-model_paths = {
-    "DeBERTa": "microsoft/deberta-v3-large-finetuned-mnli",  # מודל שעבר אימון קודם
-}
+# טוען את המודל והטוקניזר מהתיקייה המקומית במקום Hugging Face
+local_model_path = r"C:\Users\yifat\PycharmProjects\Models\deberta_finetuned"
+tokenizer = AutoTokenizer.from_pretrained(local_model_path)
+model = AutoModelForSequenceClassification.from_pretrained(local_model_path).to("cuda" if torch.cuda.is_available() else "cpu")
+
+print(f"\nUsing fine-tuned model from: {local_model_path}")
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-print(f"Using device: {device}")
 
 # פונקציה ליצירת דאטה לאימון
 class TaxDataset(Dataset):
@@ -68,61 +69,56 @@ class TaxDataset(Dataset):
         return {key: val.squeeze(0) for key, val in inputs.items()}, torch.tensor(label, dtype=torch.float)
 
 
-# Fine-Tuning עם מודל שעבר אימון קודם
-for model_name, model_path in model_paths.items():
-    print(f"\nTraining {model_name} with fine-tuned model...")
+# Fine-Tuning עם המודל המקומי
+print(f"\n🚀 Training the locally saved fine-tuned model...")
 
-    tokenizer = DebertaV2Tokenizer.from_pretrained(model_path)
-    model = AutoModelForSequenceClassification.from_pretrained(model_path, num_labels=1).to(device)
+dataset = TaxDataset(titles_2017, titles_2018, tokenizer)
+dataloader = DataLoader(dataset, batch_size=4, shuffle=True)  # הקטנת batch size למניעת בעיות זיכרון
 
-    dataset = TaxDataset(titles_2017, titles_2018, tokenizer)
-    dataloader = DataLoader(dataset, batch_size=4, shuffle=True)  # הקטנת batch size
+optimizer = AdamW(model.parameters(), lr=2e-5)
+num_training_steps = len(dataloader) * 2
+lr_scheduler = get_scheduler("linear", optimizer=optimizer, num_warmup_steps=0, num_training_steps=num_training_steps)
 
-    optimizer = AdamW(model.parameters(), lr=2e-5)
-    num_training_steps = len(dataloader) * 2
-    lr_scheduler = get_scheduler("linear", optimizer=optimizer, num_warmup_steps=0,
-                                 num_training_steps=num_training_steps)
+model.train()
+step = 0
+for epoch in range(2):  # הורדת מספר ה-epochs כדי לייעל את זמן האימון
+    total_loss = 0
+    num_batches = len(dataloader)
 
-    model.train()
-    step = 0
-    for epoch in range(2):  # נוריד ל-2 epochs כדי לייעל זמן
-        total_loss = 0
-        num_batches = len(dataloader)
+    for step, batch in enumerate(dataloader):
+        inputs, labels = batch
+        inputs = {k: v.to(device) for k, v in inputs.items()}
+        labels = labels.to(device)
 
-        for step, batch in enumerate(dataloader):
-            inputs, labels = batch
-            inputs = {k: v.to(device) for k, v in inputs.items()}
-            labels = labels.to(device)
+        outputs = model(**inputs)
+        loss = torch.nn.functional.mse_loss(outputs.logits.squeeze(), labels)
+        loss.backward()
+        optimizer.step()
+        lr_scheduler.step()
+        optimizer.zero_grad()
 
-            outputs = model(**inputs)
-            loss = torch.nn.functional.mse_loss(outputs.logits.squeeze(), labels)
-            loss.backward()
-            optimizer.step()
-            lr_scheduler.step()
-            optimizer.zero_grad()
+        total_loss += loss.item()
 
-            total_loss += loss.item()
+        # הדפסת ה-Loss כל 10 צעדים
+        if step % 10 == 0:
+            print(f"\nEpoch {epoch + 1}, Step {step}, Loss: {loss.item():.6f}")
 
-            # הדפסת ה-Loss כל 10 צעדים
-            if step % 10 == 0:
-                print(f"\nEpoch {epoch + 1}, Step {step}, Loss: {loss.item():.6f}")
+        # שמירת מודל כל 50 צעדים
+        if step % 50 == 0:
+            save_path = f"C:\\Users\\yifat\\PycharmProjects\\Final-Project\\Output_Files\\checkpoint_epoch{epoch}_step{step}"
+            model.save_pretrained(save_path)
+            tokenizer.save_pretrained(save_path)
+            print(f"\nCheckpoint saved at step {step}")
 
-            # שמירת המודל כל 50 צעדים
-            if step % 50 == 0:
-                save_path = f"C:\\Users\\yifat\\PycharmProjects\\Final-Project\\Output_Files\\checkpoint_{model_name}_epoch{epoch}_step{step}"
-                model.save_pretrained(save_path)
-                tokenizer.save_pretrained(save_path)
-                print(f"\nCheckpoint saved at step {step}")
+    avg_loss = total_loss / num_batches
+    print(f"\nEpoch {epoch + 1} completed. Average Loss: {avg_loss:.6f}")
 
-        avg_loss = total_loss / num_batches
-        print(f"\nEpoch {epoch + 1} completed. Average Loss: {avg_loss:.6f}")
+# שמירת המודל המאומן
+fine_tuned_path = r"C:\Users\yifat\PycharmProjects\Final-Project\Output_Files\fine_tuned_deberta"
+model.save_pretrained(fine_tuned_path)
+tokenizer.save_pretrained(fine_tuned_path)
+print(f"\nFine-Tuned model saved to: {fine_tuned_path}")
 
-    # שמירת המודל המאומן
-    fine_tuned_path = f"C:\\Users\\yifat\\PycharmProjects\\Final-Project\\Output_Files\\fine_tuned_{model_name}"
-    model.save_pretrained(fine_tuned_path)
-    tokenizer.save_pretrained(fine_tuned_path)
-    print(f"\nFine-Tuned {model_name} saved to: {fine_tuned_path}")
-
-    # שמירת תוצאות לאחר האימון
-    output_results_path = f"C:\\Users\\yifat\\PycharmProjects\\Final-Project\\Output_Files\\fine_tuned_results_{model_name}.xlsx"
-    print(f"\nFine-Tuned results for {model_name} saved to: {output_results_path}")
+# שמירת תוצאות לאחר האימון
+output_results_path = r"C:\Users\yifat\PycharmProjects\Final-Project\Output_Files\fine_tuned_results.xlsx"
+print(f"\nFine-Tuned results saved to: {output_results_path}")
