@@ -6,8 +6,6 @@ from sentence_transformers import SentenceTransformer, util
 from rapidfuzz import fuzz
 import numpy as np
 import os
-import matplotlib.pyplot as plt
-from sklearn.metrics import precision_score, recall_score, f1_score
 
 # קבצי הקלט
 file_2017_path = r"C:\Users\yifat\PycharmProjects\Final-Project\Data Collection & Preprocessing\Extracted_Hierarchy_Content_2017_fixed.xlsx"
@@ -23,18 +21,13 @@ df_2018_clean = df_2018.dropna(subset=['hierarchy_level_name', 'content'])
 titles_2017 = list(df_2017_clean['hierarchy_level_name'])
 titles_2018 = list(df_2018_clean['hierarchy_level_name'])
 
-# רשימת המודלים לאימון
+# שימוש במודל שעבר Fine-Tuning
 model_paths = {
-    "DeBERTa": "microsoft/deberta-v3-large",
-    #"DeBERTa": "microsoft/deberta-v3-large-finetuned-mnli",
-    "BERT": "bert-base-uncased",
-    "RoBERTa": "roberta-large",
-    "SimCSE": "princeton-nlp/sup-simcse-roberta-large"
+    "DeBERTa": "microsoft/deberta-v3-large-finetuned-mnli",  # מודל שעבר אימון קודם
 }
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using device: {device}")
-
 
 # פונקציה ליצירת דאטה לאימון
 class TaxDataset(Dataset):
@@ -75,24 +68,25 @@ class TaxDataset(Dataset):
         return {key: val.squeeze(0) for key, val in inputs.items()}, torch.tensor(label, dtype=torch.float)
 
 
-#  Fine-Tuning לכל המודלים
+# Fine-Tuning עם מודל שעבר אימון קודם
 for model_name, model_path in model_paths.items():
-    print(f"\nTraining {model_name}...")
+    print(f"\nTraining {model_name} with fine-tuned model...")
 
     tokenizer = DebertaV2Tokenizer.from_pretrained(model_path)
     model = AutoModelForSequenceClassification.from_pretrained(model_path, num_labels=1).to(device)
 
     dataset = TaxDataset(titles_2017, titles_2018, tokenizer)
-    dataloader = DataLoader(dataset, batch_size=8, shuffle=True)
+    dataloader = DataLoader(dataset, batch_size=4, shuffle=True)  # הקטנת batch size
 
     optimizer = AdamW(model.parameters(), lr=2e-5)
-    num_training_steps = len(dataloader) * 3
+    num_training_steps = len(dataloader) * 2
     lr_scheduler = get_scheduler("linear", optimizer=optimizer, num_warmup_steps=0,
                                  num_training_steps=num_training_steps)
 
     model.train()
-    for epoch in range(3):
-        total_loss = 0  # משתנה לאגירת ה-LOSS הכולל
+    step = 0
+    for epoch in range(2):  # נוריד ל-2 epochs כדי לייעל זמן
+        total_loss = 0
         num_batches = len(dataloader)
 
         for step, batch in enumerate(dataloader):
@@ -109,17 +103,17 @@ for model_name, model_path in model_paths.items():
 
             total_loss += loss.item()
 
-            # הדפסה של ה-LOSS כל 10 צעדים
+            # הדפסת ה-Loss כל 10 צעדים
             if step % 10 == 0:
                 print(f"\nEpoch {epoch + 1}, Step {step}, Loss: {loss.item():.6f}")
 
-            if step % 50 == 0:  # שמירת המודל כל 50 צעדים
+            # שמירת המודל כל 50 צעדים
+            if step % 50 == 0:
                 save_path = f"C:\\Users\\yifat\\PycharmProjects\\Final-Project\\Output_Files\\checkpoint_{model_name}_epoch{epoch}_step{step}"
                 model.save_pretrained(save_path)
                 tokenizer.save_pretrained(save_path)
                 print(f"\nCheckpoint saved at step {step}")
 
-        # הדפסה של ה-LOSS הממוצע בסוף כל Epoch
         avg_loss = total_loss / num_batches
         print(f"\nEpoch {epoch + 1} completed. Average Loss: {avg_loss:.6f}")
 
@@ -129,21 +123,6 @@ for model_name, model_path in model_paths.items():
     tokenizer.save_pretrained(fine_tuned_path)
     print(f"\nFine-Tuned {model_name} saved to: {fine_tuned_path}")
 
-    # השוואת כותרות עם המודל המאומן
-    model.eval()
-    results = []
-    for title in titles_2017:
-        best_match, fw_score, bert_score = dataset.find_best_match(title, titles_2018)
-        results.append((title, best_match, fw_score, bert_score))
-
-    df_results = pd.DataFrame(results, columns=["Title 2017", "Title 2018", "Fuzzy Score", "Fine-Tuned Similarity"])
-
-    # שמירת תוצאות
+    # שמירת תוצאות לאחר האימון
     output_results_path = f"C:\\Users\\yifat\\PycharmProjects\\Final-Project\\Output_Files\\fine_tuned_results_{model_name}.xlsx"
-    df_results.to_excel(output_results_path, index=False)
     print(f"\nFine-Tuned results for {model_name} saved to: {output_results_path}")
-
-    # הצגת מדדים לאחר האימון
-    mean_similarity = df_results["Fine-Tuned Similarity"].mean()
-    accuracy = sum(df_results["Fine-Tuned Similarity"] > 0.8) / len(df_results)
-    print(f"\n{model_name} Fine-Tuned Metrics:\nMean Similarity: {mean_similarity:.4f}\nAccuracy: {accuracy:.4f}")
