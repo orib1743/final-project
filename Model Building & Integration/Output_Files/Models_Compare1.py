@@ -71,7 +71,7 @@ print(f"🎮 Using GPU: {torch.cuda.get_device_name(0)}")
 
 # הגדרת המודלים להשוואה
 models = {
-    "Agnostic BERT": SentenceTransformer("sentence-transformers/all-mpnet-base-v2"),
+    "BERT": SentenceTransformer("sentence-transformers/all-mpnet-base-v2"),
     "RoBERTa": SentenceTransformer("sentence-transformers/all-roberta-large-v1"),
     "DeBERTa": (deberta_model, deberta_tokenizer),  # שמור את המודל וה-tokenizer כטאפלה
     "SimCSE": SentenceTransformer("princeton-nlp/sup-simcse-roberta-large")
@@ -220,10 +220,7 @@ for model_name, df in results.items():
 
     mean_similarity = df["BERT Similarity"].mean()
     std_dev = df["BERT Similarity"].std()
-    accuracy = sum(df["BERT Similarity"] > 0.8) / len(df)  # נחשב דיוק לפי סף של 0.8
     precision = precision_score(df["BERT Similarity"] > 0.8, [True] * len(df), zero_division=0)
-    recall = recall_score(df["BERT Similarity"] > 0.8, [True] * len(df), zero_division=0)
-    f1 = f1_score(df["BERT Similarity"] > 0.8, [True] * len(df), zero_division=0)
 
     #mistral_diff_length = df["Mistral Differences"].apply(lambda x: len(str(x)) if isinstance(x, str) else 0).mean()
 
@@ -236,10 +233,7 @@ for model_name, df in results.items():
     metrics[model_name] = {
         "Mean Similarity": mean_similarity,
         "Std Dev": std_dev,
-        "Accuracy": accuracy,
-        "Precision": precision,
-        "Recall": recall,
-        "F1 Score": f1
+        "Precision": precision
         #"Mistral Diff Length": mistral_diff_length
         #"GPT Diff Length": gpt_diff_length  # כמה הטקסטים שונים לפי GPT
     }
