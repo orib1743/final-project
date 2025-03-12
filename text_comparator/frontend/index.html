@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semantic Text Comparison</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <h1>Compare Two Documents with Semantic Matching</h1>
+    <div class="container">
+        <div class="drop-area" id="drop-area1">
+            <input type="file" id="file1" accept=".txt,.docx,.pdf" hidden>
+            <p id="file1-label">Drag & Drop File Here or Click to Upload</p>
+        </div>
+
+        <div class="drop-area" id="drop-area2">
+            <input type="file" id="file2" accept=".txt,.docx,.pdf" hidden>
+            <p id="file2-label">Drag & Drop File Here or Click to Upload</p>
+        </div>
+
+        <button id="compare-button">Compare</button>
+    </div>
+
+    <div class="diff-container">
+        <div id="text1" class="text-box"></div>
+        <div id="text2" class="text-box"></div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
