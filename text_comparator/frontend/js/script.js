@@ -65,10 +65,32 @@ function compareFiles() {
         console.log("📥 תשובה מהשרת:", data);
         displayDifferences(data);
     })
-    .catch(error => console.error("❌ שגיאה בשליחת הבקשה:", error));
+    .catch(error => {
+        console.error("❌ שגיאה בשליחת הבקשה:", error);
+        alert("Error: Could not process request. Check server logs.");
+    });
 }
 
 function displayDifferences(differences) {
-    document.getElementById("text1").innerHTML = differences.text1;
-    document.getElementById("text2").innerHTML = differences.text2;
+    let text1Container = document.getElementById("text1");
+    let text2Container = document.getElementById("text2");
+
+    if (!text1Container || !text2Container) {
+        console.error("❌ שגיאה: אלמנטים text1/text2 לא נמצאו ב-HTML.");
+        return;
+    }
+
+    // שמירה על המבנה של הטקסט - המרה של שורות חדשות לרכיבי <br>
+    let formattedText1 = differences.text1 ? differences.text1.replace(/\n/g, "<br>") : "<p>⚠️ No text found for Document 1</p>";
+    let formattedText2 = differences.text2 ? differences.text2.replace(/\n/g, "<br>") : "<p>⚠️ No text found for Document 2</p>";
+
+    // שמירה על רווחים במקרים של טקסט מודגש
+    formattedText1 = formattedText1.replace(/\s{2,}/g, "&nbsp;&nbsp;");
+    formattedText2 = formattedText2.replace(/\s{2,}/g, "&nbsp;&nbsp;");
+
+    text1Container.innerHTML = formattedText1;
+    text2Container.innerHTML = formattedText2;
+
+    console.log("✅ טקסט הוצג בהצלחה בפורמט HTML!");
 }
+

@@ -29,6 +29,7 @@ button {
     display: flex;
     justify-content: center;
     margin-top: 20px;
+    gap: 20px;
 }
 
 .text-box {
@@ -37,10 +38,11 @@ button {
     padding: 10px;
     border: 1px solid #ccc;
     background: #fff;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .semantic-match {
-    background-color: yellow;
+    background-color: yellow !important;
     font-weight: bold;
+    padding: 2px;
 }
