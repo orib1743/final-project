@@ -47,37 +47,24 @@ def jaccard_similarity(str1, str2):
     set1, set2 = set(str1.split()), set(str2.split())
     return len(set1 & set2) / len(set1 | set2) if set1 | set2 else 0
 
-def levenshtein_distance(str1, str2):
-    """ מחשב את מרחק Levenshtein בין שתי מחרוזות """
-    return len(str1) + len(str2) - 2 * SequenceMatcher(None, str1, str2).ratio() * min(len(str1), len(str2))
+def find_best_match(title, candidate, fuzzy_threshold=80, jaccard_threshold=0.7, bert_weight=0.7, fuzzy_weight=0.2, jaccard_weight=0.1):
+    """ מחפש את ההתאמה הטובה ביותר בעזרת BERT, Fuzzy ו-Jaccard עם עדיפות ל-BERT """
+    fw_score = fuzz.token_sort_ratio(title, candidate)
+    jaccard = jaccard_similarity(title, candidate)
 
-def find_best_match(title, candidates, fuzzy_threshold=80, jaccard_threshold=0.7, levenshtein_threshold=5):
-    """ מחפש את ההתאמה הטובה ביותר בעזרת Fuzzy, Jaccard, Levenshtein ובמידת הצורך LaBSE """
-    best_match = None
-    best_fuzzy_score = 0
-    best_bert_score = 0
-    best_jaccard = 0
-    best_levenshtein = float('inf')
+    # חישוב ציון משולב ראשוני ללא BERT
+    combined_score = fw_score * fuzzy_weight + jaccard * 100 * jaccard_weight  # Fuzzy ו-Jaccard עם משקל נמוך
 
-    for candidate in candidates:
-        fw_score = fuzz.token_sort_ratio(title, candidate)
-        jaccard = jaccard_similarity(title, candidate)
-        levenshtein = levenshtein_distance(title, candidate)
+    # חישוב ציון BERT
+    emb_title = encode_text([title])
+    emb_candidate = encode_text([candidate])
+    bert_score = util.pytorch_cos_sim(emb_title, emb_candidate).item()
 
-        if fw_score > best_fuzzy_score:
-            best_fuzzy_score = fw_score
-            best_match = candidate
-            best_jaccard = jaccard
-            best_levenshtein = levenshtein
+    # BERT מקבל את המשקל הגבוה ביותר
+    combined_score += bert_score * 100 * bert_weight
 
-            if best_fuzzy_score >= fuzzy_threshold or best_jaccard >= jaccard_threshold or best_levenshtein <= levenshtein_threshold or (best_fuzzy_score + best_jaccard * 100) >= 100:
-                emb_title = encode_text([title])
-                emb_candidate = encode_text([candidate])
-                bert_score = util.pytorch_cos_sim(emb_title, emb_candidate).item()
-                if bert_score > best_bert_score:
-                    best_bert_score = bert_score
+    return candidate, fw_score, bert_score, jaccard  # אין צורך להחזיק 'best_match' כי יש רק התאמה אחת
 
-    return best_match, best_fuzzy_score, best_bert_score, best_jaccard, best_levenshtein
 
 # מציאת כותרות תואמות בין 2017 ל-2018
 matched_titles = {}
@@ -85,39 +72,58 @@ title_pairs = []
 fuzzy_scores = []
 bert_scores = []
 jaccard_scores = []
-levenshtein_scores = []
 remaining_titles_2018 = titles_2018.copy()
 
+# הדפסת 10 הכותרות הראשונות של 2018 לפני תחילת ההשוואות
+print(f"🔹 Titles in 2018 before loop: {remaining_titles_2018[:10]}")
+
 for index_2017, title_2017 in titles_2017:
+    print(f"\n🔍 Processing {index_2017}/{len(titles_2017)}: {title_2017}")  # הצגת התקדמות
+
     if not remaining_titles_2018:
         break
+
     best_match = None
     best_fw_score = 0
     best_bert_score = 0
     best_jaccard = 0
-    best_levenshtein = float('inf')
     best_index_2018 = None
 
     for index_2018, candidate_2018 in remaining_titles_2018:
-        match, fw_score, bert_score, jaccard, levenshtein = find_best_match(title_2017, candidate_2018)
-        if match and (fw_score >= 80 or bert_score >= 0.7 or jaccard >= 0.7 or levenshtein <= 5):
-            best_match = candidate_2018
+
+        # 🔍 בדיקה אם הכותרת "Subtitle A—Income Taxes" נבדקת מול מועמדים מ-2018
+        if title_2017 == "Subtitle A—Income Taxes":
+            print(f"⚡ Checking: {title_2017} (2017) vs. {candidate_2018} (2018)")
+
+        match, fw_score, bert_score, jaccard = find_best_match(title_2017, candidate_2018)  # ✅ שליחת טקסט בלבד
+
+        # 🔍 הדפסת תוצאות כל מדדי ההשוואה
+        print(f"   🎯 Results -> Fuzzy: {fw_score}, Jaccard: {jaccard}, BERT: {bert_score}")
+
+        # התאמה מתקבלת רק אם ה-BERT עובר את הסף וגם אחד הקריטריונים האחרים עובר סף
+        if match and (bert_score >= 0.8 and (fw_score >= 80 or jaccard >= 0.7)):
+            best_match = candidate_2018  # ✅ שמירת רק הכותרת
             best_fw_score = fw_score
             best_bert_score = bert_score
             best_jaccard = jaccard
-            best_levenshtein = levenshtein
             best_index_2018 = index_2018
             break  # אחרי שמצאנו התאמה טובה, נצא מהלולאה
 
     if best_match:
         matched_titles[index_2017] = best_index_2018
-        print(f"Matched: {title_2017} (2017) -> {best_match} (2018)")
+        print(f"✅ Matched: {title_2017} (2017) -> {best_match} (2018)")
         title_pairs.append((index_2017, title_2017, best_index_2018, best_match))
         fuzzy_scores.append(best_fw_score)
         bert_scores.append(best_bert_score)
         jaccard_scores.append(best_jaccard)
-        levenshtein_scores.append(best_levenshtein)
+
+        # 🔍 בדיקה אם הכותרת מסולקת נכון מהרשימה
+        print(f"❌ Removing {best_match} from remaining_titles_2018")
         remaining_titles_2018 = [(idx, t) for idx, t in remaining_titles_2018 if idx != best_index_2018]
+
+    else:
+        print(f"⚠️ Warning: No good match found for {title_2017} (2017)")
+
 
 print("Matched Titles Dictionary:")
 print(matched_titles)
@@ -128,7 +134,6 @@ matched_df = pd.DataFrame(title_pairs, columns=["Index 2017", "Title 2017", "Ind
 matched_df["Fuzzy Score"] = fuzzy_scores
 matched_df["BERT Similarity"] = bert_scores
 matched_df["Jaccard Similarity"] = jaccard_scores
-matched_df["Levenshtein Distance"] = levenshtein_scores
 
 matched_df.to_excel(r"C:\Users\yifat\PycharmProjects\Final-Project\Output_Files\LaBSE_NoDup_Matched_Titles.xlsx",
                     index=False)
@@ -222,7 +227,12 @@ changed_text_2017 = []
 changed_text_2018 = []
 
 for _, row in matched_df.iterrows():
-    index_2017, title_2017, index_2018, title_2018 = row
+    #index_2017, title_2017, index_2018, title_2018 = row
+    index_2017 = row["Index 2017"]
+    title_2017 = row["Title 2017"]
+    index_2018 = row["Index 2018"]
+    title_2018 = row["Title 2018"]
+
     sim, sim_matrix, text_2017, text_2018 = compute_similarity(content_2017.get(index_2017, []), content_2018.get(index_2018, []))
     similarities.append(sim)
     titles_common.append(title_2017)

@@ -17,7 +17,7 @@ df_2017_clean = df_2017.dropna(subset=['hierarchy_level_name', 'content'])
 df_2018_clean = df_2018.dropna(subset=['hierarchy_level_name', 'content'])
 
 # מציאת התאמות בין כותרות באמצעות fuzzywuzzy ו-LaBSE
-titles_2017 = list(df_2017_clean['hierarchy_level_name'])
+    titles_2017 = list(df_2017_clean['hierarchy_level_name'])
 titles_2018 = list(df_2018_clean['hierarchy_level_name'])
 
 # טען את מודל LaBSE
