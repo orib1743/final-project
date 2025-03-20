@@ -1,0 +1,48 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+    text-align: center;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.drop-area {
+    border: 2px dashed #ccc;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background 0.3s ease;
+}
+
+.diff-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 20px;
+}
+
+.text-box {
+    width: 45%;
+    height: 500px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    background: #fff;
+    overflow-y: auto;
+}
+
+.semantic-match {
+    background-color: yellow !important;
+    font-weight: bold;
+    padding: 2px;
+}
